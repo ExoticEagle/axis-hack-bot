@@ -83,12 +83,11 @@ def display():
 # index.html basically (not needed in production because we have React frontend)
 @app.route('/')
 def index():
-    return flask.Response(
-        "<h1>Welcome to our webapp!</h1>" + \
+    return Flask.make_response(app,
+        "<h1>Welcome to the backend webapp!</h1>" + \
         f"<form action=\"{url_for('display')}\"> " + \
         "Enter twitter handle to search: <input type=\"text\" id=\"handle\" name=\"handle\">" + \
-        f"</form>",
-        mimetype="application/json"
+        f"</form>"
     )
 
 if __name__ == '__main__':
