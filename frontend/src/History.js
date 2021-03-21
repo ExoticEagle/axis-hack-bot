@@ -56,9 +56,12 @@ class History extends React.Component {
   render() {
     return (
       <div>
-        <button onClick={this.handleHistory}>Refresh</button>
+        <button class="blocks accent" onClick={this.handleHistory}>
+          Refresh
+        </button>
         {this.state.onDisplay && this.renderHistory()}
         <button
+          class="blocks"
           onClick={() => {
             this.history.goBack();
           }}

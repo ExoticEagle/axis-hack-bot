@@ -23,6 +23,7 @@ class Home extends React.Component {
       id: "fdsdsf",
       text: "dfsdafsf",
     };
+    this.state.isReplyButtonVisible = false;
     this.state.openReplyDialog = false;
     this.state.replyingIndex = -1;
     this.history = this.props.history;
@@ -37,9 +38,9 @@ class Home extends React.Component {
   }
   createform() {
     return (
-      <div className=" sm:mb-2 sm:mb-2  lg:mb-4 lg:mt-4 ">
+      <div className=" sm:mb-2 sm:mb-2  pd-4 ">
         <form className="lg:space-y-2 font-mono sm-text-sm lg:text-2xl ">
-          <div class="">
+          <div class="blocks outline-none">
             <input
               type="text"
               placeholder="Twitter handle"
@@ -55,26 +56,22 @@ class Home extends React.Component {
 
   renderTweets() {
     return this.state.tweets.map((tweet, index) => (
-      <tr>
-        <th scope="col">
-          <span
-            class=" text-left text-xs"
-            onClick={() => {
-              this.setState({
-                replyingIndex: index,
-                openReplyDialog: true,
-              });
-              //this.handleReply();
-            }}
-          >
-            <Tweet tweetId={tweet[1]} />
-            {this.renderReplyButton(tweet)}
-          </span>
-          {/* <span class=" text-left  text-xs">{tweet.tweetText}</span>
-          <span class=" text-left text-xs">{tweet.replyText}</span>
-          <span class=" text-left text-xs">{tweet.replyID}</span> */}
-        </th>
-      </tr>
+      <div
+        class="m-4 "
+        onClick={() => {
+          this.setState({
+            replyingIndex: index,
+            openReplyDialog: true,
+          });
+          //this.handleReply();
+        }}
+      >
+        <Tweet tweetId={tweet[1]} />
+
+        <div class="flex item-end">
+          {this.state.isReplyButtonVisible && this.renderReplyButton(tweet)}
+        </div>
+      </div>
     ));
   }
 
@@ -93,17 +90,19 @@ class Home extends React.Component {
       .then(() => {
         this.setState({
           onDisplay: true,
+          isReplyButtonVisible: true,
         });
       });
   }
   renderGenerateButton() {
     return (
-      <div>
+      <div class="items item-end mt-3">
         <button
-          className={"w-full blocks accent text-2xl"}
+          className="blocks accent m-4 bg-indigo-300 item-end text-md"
           onClick={this.handleGenerateButton}
+          style={{ "--block-accent-color": "#1DA1F2" }}
         >
-          Generate
+          Display Tweets
         </button>
       </div>
     );
@@ -158,12 +157,14 @@ class Home extends React.Component {
     return (
       <div>
         <a
+          class="blocks accent"
+          style={{ "--block-accent-color": "#1DA1F2" }}
           onClick={() => {
             this.updateHistory(tweet);
           }}
           href={tweetURL}
         >
-          Reply on Twitter
+          Reply
         </a>
       </div>
     );
@@ -175,13 +176,17 @@ class Home extends React.Component {
         {this.createform()}
         {this.renderGenerateButton()}
         {this.state.onDisplay && this.renderTweets()}
-        <button
-          onClick={() => {
-            this.history.push("/history");
-          }}
-        >
-          Display
-        </button>
+        <div className="">
+          <button
+            class="blocks accent p-5 "
+            onClick={() => {
+              this.history.push("/history");
+            }}
+            style={{ "--block-accent-color": "#1DA1F2" }}
+          >
+            History
+          </button>
+        </div>
       </div>
     );
   }
