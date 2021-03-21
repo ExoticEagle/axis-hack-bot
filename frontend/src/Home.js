@@ -9,6 +9,8 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.state.isFinalTweetLoading = false;
+    this.state.loaded = [];
     this.state.history = [
       {
         tweetHandle: "dfdf",
@@ -23,6 +25,7 @@ class Home extends React.Component {
       id: "fdsdsf",
       text: "dfsdafsf",
     };
+    this.state.isReplyButtonVisible = false;
     this.state.openReplyDialog = false;
     this.state.replyingIndex = -1;
     this.history = this.props.history;
@@ -34,12 +37,13 @@ class Home extends React.Component {
     this.renderReplyButton = this.renderReplyButton.bind(this);
     this.handleGenerateButton = this.handleGenerateButton.bind(this);
     this.renderGenerateButton = this.renderGenerateButton.bind(this);
+    this.renderCreateLoading = this.renderCreateLoading.bind(this);
   }
   createform() {
     return (
-      <div className=" sm:mb-2 sm:mb-2  lg:mb-4 lg:mt-4 ">
+      <div className=" sm:mb-2 sm:mb-2  pd-4 ">
         <form className="lg:space-y-2 font-mono sm-text-sm lg:text-2xl ">
-          <div class="">
+          <div class="blocks outline-none">
             <input
               type="text"
               placeholder="Twitter handle"
@@ -52,39 +56,61 @@ class Home extends React.Component {
       </div>
     );
   }
+  renderCreateLoading() {
+    return (
+      <div class="relative flex justify-center items-center ">
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5  bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5  bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5 bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5 bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+      </div>
+    );
+  }
 
   renderTweets() {
     return this.state.tweets.map((tweet, index) => (
-      <tr>
-        <th scope="col">
-          <span
-            class=" text-left text-xs"
-            onClick={() => {
-              this.setState({
-                replyingIndex: index,
-                openReplyDialog: true,
-              });
-              //this.handleReply();
-            }}
-          >
-            <Tweet tweetId={tweet[1]} />
-            {this.renderReplyButton(tweet)}
-          </span>
-          {/* <span class=" text-left  text-xs">{tweet.tweetText}</span>
-          <span class=" text-left text-xs">{tweet.replyText}</span>
-          <span class=" text-left text-xs">{tweet.replyID}</span> */}
-        </th>
-      </tr>
+      <div
+        class="m-4 "
+        onClick={() => {
+          this.setState({
+            replyingIndex: index,
+            openReplyDialog: true,
+          });
+          //this.handleReply();
+        }}
+      >
+        <Tweet
+          onLoad={() => {
+            this.setState((state) => {
+              state.loaded[index] = 1;
+              if (index === state.tweets.length - 1)
+                state.isFinalTweetLoading = false;
+              return state;
+            });
+          }}
+          tweetId={tweet[1]}
+        />
+
+        <div class="flex item-end">
+          {this.state.isReplyButtonVisible &&
+            this.state.loaded[index] != 0 &&
+            this.renderReplyButton(tweet)}
+        </div>
+      </div>
     ));
   }
 
   handleGenerateButton() {
+    this.setState({
+      isFinalTweetLoading: true,
+      tweets: [],
+    });
     axios
       .post(URL + "/display/?handle=" + this.state.currentHandle)
       .then((response) => {
-        console.log(response.data.Tweets);
         this.setState({
           tweets: response.data.Tweets,
+          loaded: Array(response.data.Tweets.length).fill(0),
         });
       })
       .catch(function (error) {
@@ -93,48 +119,38 @@ class Home extends React.Component {
       .then(() => {
         this.setState({
           onDisplay: true,
+          isReplyButtonVisible: true,
         });
       });
   }
   renderGenerateButton() {
     return (
-      <div>
+      <div class="items item-end mt-3">
         <button
-          className={"w-full blocks accent text-2xl"}
+          className="blocks accent m-4 bg-indigo-300 item-end text-md"
           onClick={this.handleGenerateButton}
+          style={{ "--block-accent-color": "#1DA1F2" }}
         >
-          Generate
+          Analyse tweets for this user
         </button>
       </div>
     );
   }
-  handleReply() {
-    //console.log(this.state.tweets[this.state.replyingIndex]);
-    this.setState({
-      openReplyDialog: false,
-    });
+  handleReply(tweet) {
     axios
       .post(URL + "replyToTweet", {
-        tweet: this.state.tweets[this.state.replyingIndex],
+        tweetID: tweet[0],
       })
       .then((response) => {
         this.setState({
-          replytweet: response.data,
-          openReplyDialog: true,
+          replytweet: response.data.reply_tweet,
         });
-        this.history.push("/reply");
       })
       .catch(function (error) {
         console.log(error);
       });
   }
   updateHistory(tweet) {
-    var tweetURL =
-      "https://twitter.com/intent/tweet?text=" +
-      this.state.replytweet.text +
-      "&in_reply_to=" +
-      tweet[1];
-    console.log(tweetURL);
     // axios
     //   .post(URL + "/update_history", {
     //     tweetHandle: this.state.currentHandle,
@@ -147,23 +163,26 @@ class Home extends React.Component {
     //     console.log(error);
     //   });
     console.log("we are here");
-    return <Redirect to={tweetURL} />;
   }
   renderReplyButton(tweet) {
+    //this.handleReply(tweet);
     var tweetURL =
       "https://twitter.com/intent/tweet?text=" +
       this.state.replytweet.text +
       "&in_reply_to=" +
       tweet[1];
+
     return (
       <div>
         <a
+          class="blocks accent"
+          style={{ "--block-accent-color": "#1DA1F2" }}
           onClick={() => {
             this.updateHistory(tweet);
           }}
           href={tweetURL}
         >
-          Reply on Twitter
+          Reply
         </a>
       </div>
     );
@@ -171,17 +190,22 @@ class Home extends React.Component {
   render() {
     return (
       <div>
-        <Header />
+        <Header history={this.history} />
         {this.createform()}
         {this.renderGenerateButton()}
+        {this.state.isFinalTweetLoading && this.renderCreateLoading()}
         {this.state.onDisplay && this.renderTweets()}
-        <button
-          onClick={() => {
-            this.history.push("/history");
-          }}
-        >
-          Display
-        </button>
+        <div className="">
+          <button
+            class="blocks accent p-5 "
+            onClick={() => {
+              this.history.push("/history");
+            }}
+            style={{ "--block-accent-color": "#1DA1F2" }}
+          >
+            Users responded to
+          </button>
+        </div>
       </div>
     );
   }
