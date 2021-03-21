@@ -1,12 +1,14 @@
 # app.py
-from flask import Flask, request, jsonify, url_for
 import bs4
 from bs4 import BeautifulSoup
+import flask
+from flask import Flask, request, jsonify, url_for
 import itertools
 import json
 import requests
 app = Flask(__name__)
 
+########### Internal helper functions ##########
 def is_not_hashtag(obj):
     return type(obj) != type(bs4.Tag(name=''))
 
@@ -32,6 +34,8 @@ def get_tweets(handle, debug=False):
     # filtering the list, keeping only NON-RETWEETS
     return list(itertools.compress(all_tweets, isNotRetweets))
 
+##########! ACTUAL FLASK ENDPOINTS, returning json ###########
+
 @app.route('/display/', methods=['POST', 'GET'])
 def display():
     param = request.args.get('handle')
@@ -42,22 +46,26 @@ def display():
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
     if param:
         param = param.lower() # since it is NOT case-sensitive
-        return jsonify({
+
+        return Flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
             "Handle": f"{param}",
             "Tweets": tweets 
         })
     else:
-        return jsonify({
-            "ERROR": "no handle found, please send a handle."
+        return Flask.make_response({
+            "ERROR": "No handle found, please send a handle."
         })
 
-# A welcome message to test our server
+# index.html basically (not needed in production because we have React frontend)
 @app.route('/')
 def index():
-    return "<h1>Welcome to our webapp!</h1>" + \
+    return flask.Response(
+        "<h1>Welcome to our webapp!</h1>" + \
         f"<form action=\"{url_for('display')}\"> " + \
         "Enter twitter handle to search: <input type=\"text\" id=\"handle\" name=\"handle\">" + \
-        f"</form>"
+        f"</form>",
+        mimetype="application/json"
+    )
 
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
