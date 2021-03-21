@@ -1,20 +1,33 @@
 # app.py
 from flask import Flask, request, jsonify, url_for
+import bs4
 from bs4 import BeautifulSoup
 import itertools
 import json
 import requests
 app = Flask(__name__)
 
+def is_not_hashtag(obj):
+    return type(obj) != type(bs4.Tag(name=''))
+
 # Returns list of tweets that are NOT retweets
-def get_tweets(handle):
+def get_tweets(handle, debug=False):
     response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}")
     soup = BeautifulSoup(response.json()['body'], "html.parser")
 
     # all tweets regardless of whether retweet or not
-    all_tweets = [tweet.contents[0] for tweet in soup.find_all("p", {"class": "timeline-Tweet-text"})]
+    all_tweets = [tweet.contents[0] for tweet in soup.find_all("p", class_="timeline-Tweet-text")]
+
+    # filter out hashtags 
+    all_tweets = list(filter(is_not_hashtag, all_tweets))
+    
+    if debug:
+        print("ALL Tweets: [")
+        print(',\n\t'.join(all_tweets))
+        print("]")
+
     # filter
-    isNotRetweets = [author.contents[0].lower() == f"@{handle}".lower() for author in soup.find_all("span", {"class": "TweetAuthor-screenName Identity-screenName"})]
+    isNotRetweets = [author.contents[0].lower() == f"@{handle}".lower() for author in soup.find_all("span", class_ = "TweetAuthor-screenName Identity-screenName")]
 
     # filtering the list, keeping only NON-RETWEETS
     return list(itertools.compress(all_tweets, isNotRetweets))
@@ -22,9 +35,10 @@ def get_tweets(handle):
 @app.route('/display/', methods=['POST', 'GET'])
 def display():
     param = request.args.get('handle')
-    tweets = get_tweets(param)
-    print(tweets)
-    print(param)
+    tweets = get_tweets(param, debug=True)
+    
+    print(f"Param = {param}")
+
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
     if param:
         param = param.lower() # since it is NOT case-sensitive
