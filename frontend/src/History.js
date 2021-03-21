@@ -1,19 +1,13 @@
 import React from "react";
 import axios from "axios";
+import { Tweet } from "react-twitter-widgets";
+import Header from "./Header.js";
 
 class History extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.state.history = [
-      {
-        tweetHandle: "dfdf",
-        tweetID: "hello world",
-        replyID: "ridiculous analogy",
-        tweetText: "sdfds",
-        replyText: "dfs",
-      },
-    ];
+    this.state.history = [];
     this.history = this.props.history;
     this.state.onDisplay = true;
     this.state.errorMessage = "";
@@ -25,7 +19,7 @@ class History extends React.Component {
       onDisplay: false,
     });
     axios
-      .post(URL + "history")
+      .post(URL + "history", { userHandle: localStorage.getItem("userHandle") })
       .then((response) => {
         this.setState({
           history: response.data.history,
@@ -43,20 +37,22 @@ class History extends React.Component {
   }
   renderHistory() {
     return this.state.history.map((history) => (
-      <tr>
-        <th scope="col">
-          <span class=" text-left text-xs">{history.tweetID}</span>
-          <span class=" text-left  text-xs">{history.tweetText}</span>
-          <span class=" text-left text-xs">{history.replyText}</span>
-          <span class=" text-left text-xs">{history.replyID}</span>
-        </th>
-      </tr>
+      <div className="mb-2">
+        <Tweet tweetId={history[2]} />
+        <Tweet tweetId={history[1]} />
+      </div>
     ));
   }
+
   render() {
     return (
       <div>
-        <button class="blocks accent" onClick={this.handleHistory}>
+        <Header history={this.history} />
+        <button
+          class="blocks accent"
+          style={{ "--block-accent-color": "#1DA1F2" }}
+          onClick={this.handleHistory}
+        >
           Refresh
         </button>
         {this.state.onDisplay && this.renderHistory()}

@@ -9,6 +9,7 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.state.loaded = [];
     this.state.history = [
       {
         tweetHandle: "dfdf",
@@ -66,10 +67,20 @@ class Home extends React.Component {
           //this.handleReply();
         }}
       >
-        <Tweet tweetId={tweet[1]} />
+        <Tweet
+          onLoad={() => {
+            this.setState((state) => {
+              state.loaded[index] = 1;
+              return state;
+            });
+          }}
+          tweetId={tweet[1]}
+        />
 
         <div class="flex item-end">
-          {this.state.isReplyButtonVisible && this.renderReplyButton(tweet)}
+          {this.state.isReplyButtonVisible &&
+            this.state.loaded[index] != 0 &&
+            this.renderReplyButton(tweet)}
         </div>
       </div>
     ));
@@ -79,9 +90,9 @@ class Home extends React.Component {
     axios
       .post(URL + "/display/?handle=" + this.state.currentHandle)
       .then((response) => {
-        console.log(response.data.Tweets);
         this.setState({
           tweets: response.data.Tweets,
+          loaded: Array(response.data.Tweets.length).fill(0),
         });
       })
       .catch(function (error) {
@@ -102,7 +113,7 @@ class Home extends React.Component {
           onClick={this.handleGenerateButton}
           style={{ "--block-accent-color": "#1DA1F2" }}
         >
-          Display Tweets
+          Analyse tweets for this user
         </button>
       </div>
     );
@@ -172,7 +183,7 @@ class Home extends React.Component {
   render() {
     return (
       <div>
-        <Header />
+        <Header history={this.history} />
         {this.createform()}
         {this.renderGenerateButton()}
         {this.state.onDisplay && this.renderTweets()}
@@ -184,7 +195,7 @@ class Home extends React.Component {
             }}
             style={{ "--block-accent-color": "#1DA1F2" }}
           >
-            History
+            Users responded to
           </button>
         </div>
       </div>
