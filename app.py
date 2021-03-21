@@ -18,7 +18,6 @@ def is_not_hashtag(obj):
 
 # Returns list of tuples (tweet, tweet_id) for tweets that are NOT retweets
 def get_tweets(handle, debug=False):
-    
     response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}")
     soup = BeautifulSoup(response.json()['body'], "html.parser")
 
@@ -58,7 +57,7 @@ def get_reply_text(tweet_text):
 
 #!########## DATABASE STUFF ##########
 def init_db():
-    conn = psycopg2.connect(dsn="postgresql://postgres:root@localhost/axis_hack_db")#dsn=os.getenv('DATABASE_URL'))
+    conn = psycopg2.connect(dsn=os.getenv('DATABASE_URL')) #"postgresql://postgres:root@localhost/axis_hack_db"
     cur = conn.cursor()
     
     # cur.execute('DROP TABLE IF EXISTS bot_history')
@@ -101,13 +100,16 @@ def update_history():
     reply_text = get_reply_text(tweet_text)
 
     insert_history(reply_text, tweet_id, tweet_author)
-    return Flask.make_response(app, { # When a dict is passed to this, it automatically gets json-ified
+    
+    resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
         "Hello": "oh hi. update_history() function is over.",
         "tweet_id": tweet_id,
         "tweet_author": tweet_author,
         "tweet_text": tweet_text,
         "reply_text": reply_text,
     })
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 @app.route('/history/', methods=['POST', 'GET'])
 def show_history():
@@ -132,36 +134,35 @@ def show_history():
 @app.route('/display/', methods=['POST', 'GET'])
 def display():
     handle = request.args.get('handle')
-    max_results = request.args.get('max_results')
-    if max_results:
-        tweets = get_tweets(handle, max_results, debug=True)
-    else:
-        tweets = get_tweets(handle, debug=True)
-    
-    print(f"Handle = {handle}, max_results = {max_results}")
+    tweets = get_tweets(handle, debug=True)
+    print(f"Handle = {handle}")
 
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
     if handle:
         handle = handle.lower() # since it is NOT case-sensitive
-
-        return Flask.make_response(app, { # When a dict is passed to this, it automatically gets json-ified
+        resp = flask.make_response({
             "Handle": f"{handle}",
             "Tweets": tweets 
-        })
+        })    
     else:
-        return Flask.make_response(app, {
+        resp = flask.make_response({
             "ERROR": "No handle found, please send a handle."
         })
+
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 # index.html basically (not needed in production because we have React frontend)
 @app.route('/')
 def index():
-    return Flask.make_response(app,
+    resp = flask.make_response(
         "<h1>Welcome to the backend webapp!</h1>" + \
         f"<form action=\"{url_for('display')}\"> " + \
         "Enter twitter handle to search: <input type=\"text\" id=\"handle\" name=\"handle\">" + \
         f"</form>"
     )
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
