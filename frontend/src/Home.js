@@ -2,7 +2,8 @@ import React from "react";
 import Header from "./Header.js";
 import URL from "./Constants.js";
 import axios from "axios";
-import { Dialog } from "@material-ui/core";
+import { Redirect } from "react-router";
+import { Tweet } from "react-twitter-widgets";
 
 class Home extends React.Component {
   constructor(props) {
@@ -30,7 +31,7 @@ class Home extends React.Component {
     this.state.onDisplay = false;
 
     this.handleReply = this.handleReply.bind(this);
-    this.renderDialog = this.renderDialog.bind(this);
+    this.renderReplyButton = this.renderReplyButton.bind(this);
     this.handleGenerateButton = this.handleGenerateButton.bind(this);
     this.renderGenerateButton = this.renderGenerateButton.bind(this);
   }
@@ -66,7 +67,8 @@ class Home extends React.Component {
               //this.handleReply();
             }}
           >
-            {tweet}
+            <Tweet tweetId={tweet[1]} />
+            {this.renderReplyButton(tweet)}
           </span>
           {/* <span class=" text-left  text-xs">{tweet.tweetText}</span>
           <span class=" text-left text-xs">{tweet.replyText}</span>
@@ -126,40 +128,43 @@ class Home extends React.Component {
         console.log(error);
       });
   }
-  updateHistory() {
-    axios
-      .post(URL + "updateHisotry", {
-        tweetHandle: this.state.currentHandle,
-        tweetID: this.state.tweets[this.state.replyingIndex].id,
-        replyID: this.state.replytweet.id,
-        tweetText: this.state.tweets[this.state.replyingIndex].text,
-        replyText: this.state.replytweet.text,
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+  updateHistory(tweet) {
+    var tweetURL =
+      "https://twitter.com/intent/tweet?text=" +
+      this.state.replytweet.text +
+      "&in_reply_to=" +
+      tweet[1];
+    console.log(tweetURL);
+    // axios
+    //   .post(URL + "/update_history", {
+    //     tweetHandle: this.state.currentHandle,
+    //     tweetID: tweet[1],
+    //     //replyID: this.state.replytweet.id,
+    //     tweetText: tweet[0],
+    //     //replyText: this.state.replytweet.text,
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
+    console.log("we are here");
+    return <Redirect to={tweetURL} />;
   }
-  renderDialog() {
+  renderReplyButton(tweet) {
+    var tweetURL =
+      "https://twitter.com/intent/tweet?text=" +
+      this.state.replytweet.text +
+      "&in_reply_to=" +
+      tweet[1];
     return (
-      <div class="text-5xl w-full h-full overflow-hidden">
-        <p>{this.state.tweets[this.state.replyingIndex]}</p>
-        <p>{this.state.replytweet.text}</p>
-        <button
+      <div>
+        <a
           onClick={() => {
-            this.updateHistory();
-            var tweetURL = new URLSearchParams();
-            tweetURL.append(
-              "https://twitter.com/intent/tweet?text=",
-              this.state.replytweet.text
-            );
-            tweetURL.append(
-              "&in_reply_to=",
-              this.state.tweets[this.state.replyingIndex].id
-            );
+            this.updateHistory(tweet);
           }}
+          href={tweetURL}
         >
           Reply on Twitter
-        </button>
+        </a>
       </div>
     );
   }
@@ -170,17 +175,6 @@ class Home extends React.Component {
         {this.createform()}
         {this.renderGenerateButton()}
         {this.state.onDisplay && this.renderTweets()}
-        <Dialog
-          fullscreen
-          open={this.state.openReplyDialog}
-          onClose={() => {
-            this.setState({
-              openReplyDialog: false,
-            });
-          }}
-        >
-          {this.renderDialog()}
-        </Dialog>
         <button
           onClick={() => {
             this.history.push("/history");
