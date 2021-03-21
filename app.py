@@ -5,6 +5,7 @@ import flask
 from flask import Flask, request, jsonify, url_for
 import itertools
 import json
+import re
 import requests
 app = Flask(__name__)
 
@@ -12,7 +13,7 @@ app = Flask(__name__)
 def is_not_hashtag(obj):
     return type(obj) != type(bs4.Tag(name=''))
 
-# Returns list of tweets that are NOT retweets
+# Returns list of tuples (tweet, tweet_id) for tweets that are NOT retweets
 def get_tweets(handle, debug=False):
     response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}")
     soup = BeautifulSoup(response.json()['body'], "html.parser")
@@ -20,19 +21,32 @@ def get_tweets(handle, debug=False):
     # all tweets regardless of whether retweet or not
     all_tweets = [tweet.contents[0] for tweet in soup.find_all("p", class_="timeline-Tweet-text")]
 
+    # all this stuff to get tweet ID
+    all_ids = [re.search('/status/(\d+)', a_tag['href']).group(1) for a_tag in soup.find_all("a", class_ = "timeline-Tweet-timestamp")]
+
     # filter out hashtags 
-    all_tweets = list(filter(is_not_hashtag, all_tweets))
-    
+    all_tweets = list(filter(lambda obj: type(obj[1]) != type(bs4.Tag(name='')), enumerate(all_tweets)))
+    indices_to_keep, all_tweets = map(list, list(zip(*all_tweets)))
+
     if debug:
         print("ALL Tweets: [")
-        print(',\n\t'.join(all_tweets))
+        for _id, _tweet in zip(all_ids, all_tweets):
+            print(f'\tID: {_id}, Text: {_tweet},')
         print("]")
 
-    # filter
-    isNotRetweets = [author.contents[0].lower() == f"@{handle}".lower() for author in soup.find_all("span", class_ = "TweetAuthor-screenName Identity-screenName")]
+    # filter out retweets
+    for idx, author in enumerate(soup.find_all("span", class_ = "TweetAuthor-screenName Identity-screenName")):
+        if author.contents[0].lower() != f"@{handle}".lower() and idx in indices_to_keep: # if have to remove it
+            indices_to_keep.remove(idx)
+    
+    user_tweets = [tweet for i, tweet in enumerate(all_tweets) if i in indices_to_keep]
+    user_ids = [_id for idx, _id in enumerate(all_ids) if idx in indices_to_keep]
 
-    # filtering the list, keeping only NON-RETWEETS
-    return list(itertools.compress(all_tweets, isNotRetweets))
+    if debug:
+        print(f"User tweets: {user_tweets}")
+        print(f"User ids: {user_ids}")
+
+    return list(zip(user_tweets, user_ids))
 
 ##########! ACTUAL FLASK ENDPOINTS, returning json ###########
 
@@ -47,12 +61,12 @@ def display():
     if param:
         param = param.lower() # since it is NOT case-sensitive
 
-        return Flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
+        return Flask.make_response(app, { # When a dict is passed to this, it automatically gets json-ified
             "Handle": f"{param}",
             "Tweets": tweets 
         })
     else:
-        return Flask.make_response({
+        return Flask.make_response(app, {
             "ERROR": "No handle found, please send a handle."
         })
 
