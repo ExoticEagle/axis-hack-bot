@@ -21,41 +21,7 @@ def is_not_hashtag(obj):
 # Returns list of tuples (tweet, tweet_id) for tweets that are NOT retweets
 def get_tweets(handle, max_results=100, debug=False):
     return [[tweet.content, tweet.id, tweet.quotedTweet] for i, tweet in enumerate(sntwitter.TwitterSearchScraper(f'from:{handle}').get_items()) if i<max_results]
-    # USELESS CODE 
-        # os.system(f'snscrape --jsonl --max-results {max_results} "from:{handle}"')
-        # response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}")
-        # soup = BeautifulSoup(response.json()['body'], "html.parser")
-
-        # # all tweets regardless of whether retweet or not
-        # all_tweets = [tweet.contents[0] for tweet in soup.find_all("p", class_="timeline-Tweet-text")]
-
-        # # all this stuff to get tweet ID
-        # all_ids = [re.search('/status/(\d+)', a_tag['href']).group(1) for a_tag in soup.find_all("a", class_ = "timeline-Tweet-timestamp")]
-
-        # # filter out hashtags 
-        # all_tweets = list(filter(lambda obj: type(obj[1]) != type(bs4.Tag(name='')), enumerate(all_tweets)))
-        # indices_to_keep, all_tweets = map(list, list(zip(*all_tweets)))
-
-        # if debug:
-        #     print("ALL Tweets: [")
-        #     for _id, _tweet in zip(all_ids, all_tweets):
-        #         print(f'\tID: {_id}, Text: {_tweet},')
-        #     print("]")
-
-        # # filter out retweets
-        # for idx, author in enumerate(soup.find_all("span", class_ = "TweetAuthor-screenName Identity-screenName")):
-        #     if author.contents[0].lower() != f"@{handle}".lower() and idx in indices_to_keep: # if have to remove it
-        #         indices_to_keep.remove(idx)
-        
-        # user_tweets = [tweet for i, tweet in enumerate(all_tweets) if i in indices_to_keep]
-        # user_ids = [_id for idx, _id in enumerate(all_ids) if idx in indices_to_keep]
-
-        # if debug:
-        #     print(f"User tweets: {user_tweets}")
-        #     print(f"User ids: {user_ids}")
-
-        # return list(zip(user_tweets, user_ids))
-
+    
 #! ML STUFF
 def get_reply_text(tweet_ID):
 	# first get tweet text using ID
@@ -74,10 +40,10 @@ async def init_db() -> asyncpg.connection.Connection:
     # print("Create table if not exists done.")
     return conn
 
-async def insert_history(reply_text, tweet_id):
-	conn = await init_db()
-	await conn.execute("INSERT INTO bot_history VALUES ($1, $2)", reply_text, tweet_id)
-	await conn.close()
+async def insert_history(reply_text, tweet_id): 
+    conn = await init_db()
+    await conn.execute("INSERT INTO bot_history VALUES ($1, $2)", reply_text, tweet_id)
+    await conn.close()
 
 ##########! ACTUAL FLASK ENDPOINTS, returning json ###########
 
