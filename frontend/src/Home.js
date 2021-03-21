@@ -9,6 +9,7 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
+    this.state.isFinalTweetLoading = false;
     this.state.loaded = [];
     this.state.history = [
       {
@@ -36,6 +37,7 @@ class Home extends React.Component {
     this.renderReplyButton = this.renderReplyButton.bind(this);
     this.handleGenerateButton = this.handleGenerateButton.bind(this);
     this.renderGenerateButton = this.renderGenerateButton.bind(this);
+    this.renderCreateLoading = this.renderCreateLoading.bind(this);
   }
   createform() {
     return (
@@ -51,6 +53,16 @@ class Home extends React.Component {
             />
           </div>
         </form>
+      </div>
+    );
+  }
+  renderCreateLoading() {
+    return (
+      <div class="relative flex justify-center items-center ">
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5  bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5  bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5 bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5 bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
       </div>
     );
   }
@@ -71,6 +83,8 @@ class Home extends React.Component {
           onLoad={() => {
             this.setState((state) => {
               state.loaded[index] = 1;
+              if (index === state.tweets.length - 1)
+                state.isFinalTweetLoading = false;
               return state;
             });
           }}
@@ -87,6 +101,10 @@ class Home extends React.Component {
   }
 
   handleGenerateButton() {
+    this.setState({
+      isFinalTweetLoading: true,
+      tweets: [],
+    });
     axios
       .post(URL + "/display/?handle=" + this.state.currentHandle)
       .then((response) => {
@@ -118,33 +136,21 @@ class Home extends React.Component {
       </div>
     );
   }
-  handleReply() {
-    //console.log(this.state.tweets[this.state.replyingIndex]);
-    this.setState({
-      openReplyDialog: false,
-    });
+  handleReply(tweet) {
     axios
       .post(URL + "replyToTweet", {
-        tweet: this.state.tweets[this.state.replyingIndex],
+        tweetID: tweet[0],
       })
       .then((response) => {
         this.setState({
-          replytweet: response.data,
-          openReplyDialog: true,
+          replytweet: response.data.reply_tweet,
         });
-        this.history.push("/reply");
       })
       .catch(function (error) {
         console.log(error);
       });
   }
   updateHistory(tweet) {
-    var tweetURL =
-      "https://twitter.com/intent/tweet?text=" +
-      this.state.replytweet.text +
-      "&in_reply_to=" +
-      tweet[1];
-    console.log(tweetURL);
     // axios
     //   .post(URL + "/update_history", {
     //     tweetHandle: this.state.currentHandle,
@@ -157,14 +163,15 @@ class Home extends React.Component {
     //     console.log(error);
     //   });
     console.log("we are here");
-    return <Redirect to={tweetURL} />;
   }
   renderReplyButton(tweet) {
+    //this.handleReply(tweet);
     var tweetURL =
       "https://twitter.com/intent/tweet?text=" +
       this.state.replytweet.text +
       "&in_reply_to=" +
       tweet[1];
+
     return (
       <div>
         <a
@@ -186,6 +193,7 @@ class Home extends React.Component {
         <Header history={this.history} />
         {this.createform()}
         {this.renderGenerateButton()}
+        {this.state.isFinalTweetLoading && this.renderCreateLoading()}
         {this.state.onDisplay && this.renderTweets()}
         <div className="">
           <button

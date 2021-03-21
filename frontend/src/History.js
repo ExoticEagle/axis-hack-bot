@@ -48,22 +48,28 @@ class History extends React.Component {
     return (
       <div>
         <Header history={this.history} />
-        <button
-          class="blocks accent"
-          style={{ "--block-accent-color": "#1DA1F2" }}
-          onClick={this.handleHistory}
-        >
-          Refresh
-        </button>
+        <div className="flex flex-row ">
+          <div className="w-4/5">
+            <button
+              class="blocks accent"
+              style={{ "--block-accent-color": "#1DA1F2" }}
+              onClick={this.handleHistory}
+            >
+              Refresh
+            </button>
+          </div>
+          <div className="flex flex-grow text-right">
+            <button
+              class="blocks float-right"
+              onClick={() => {
+                this.history.goBack();
+              }}
+            >
+              Go back
+            </button>
+          </div>
+        </div>
         {this.state.onDisplay && this.renderHistory()}
-        <button
-          class="blocks"
-          onClick={() => {
-            this.history.goBack();
-          }}
-        >
-          Go back
-        </button>
       </div>
     );
   }
