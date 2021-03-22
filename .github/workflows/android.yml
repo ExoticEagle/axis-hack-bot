@@ -16,11 +16,15 @@ jobs:
     - name: go to frontend
       run: cd ./frontend
 
+    - uses: actions/setup-node@v2
+      with:
+          node-version: '12'
+
     - name: init
       run: |
         npm install @capacitor/core@next @capacitor/cli@next
         npx cap init
-        sed -i '1s/^/import "@capacitor/core";/' ./src/index.js
+        sed -i '1s/^/import "@capacitor\/core";/' ./src/index.js
 
     - name: setup android
       run: |
