@@ -19,8 +19,12 @@ def is_not_hashtag(obj):
 
 # Returns list of tuples (tweet, tweet_id) for tweets that are NOT retweets
 def get_tweets(handle,  filter_scientific, science_word_threshold = 2, debug=False):
-    response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}&with_replies=1")
-    soup = BeautifulSoup(response.json()['body'], "html.parser")
+
+    try:
+        response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}&with_replies=1")
+        soup = BeautifulSoup(response.json()['body'], "html.parser")
+    except:
+        return None
 
     # all tweets regardless of whether retweet or not
     all_tweets = [tweet.contents[0] for tweet in soup.find_all("p", class_="timeline-Tweet-text")]
@@ -51,8 +55,6 @@ def get_tweets(handle,  filter_scientific, science_word_threshold = 2, debug=Fal
             c, text = ml.get_science_word_count(tweet)
             text = text.split()
             print(f"For tweet ({tweet.strip()}), no of science words: {c}")
-            # ratio of scientific words in the tweet to total no of words in the tweet should be greater than 1
-            # if len(text) == 0 or (c/len(text) < science_word_threshold): 
             if c < science_word_threshold and not (len(text) <= 3 and c == 1) and idx in indices_to_keep:
                 indices_to_keep.remove(idx)
 
@@ -79,10 +81,7 @@ def init_db():
         'user_handle varchar(100)'     # author of the tweet the user wants to reply to.
         ')'
     )
-    # cur.execute('INSERT INTO bot_history (reply_content, tweet_id, tweet_author) VALUES (%s, %s, %s)', ("reply to the tweet", "tweet_ID_heeHee", "bruhshikesh"))
-
     conn.commit()
-    # print("Create table if not exists done.")
     
     cur.close()
     return conn
@@ -119,9 +118,7 @@ def update_history():
             "reply_text": reply_text,
         })
     else:
-        resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
-            "ERROR": "Enter tweet_id, tweet_text and user_handle fields!"
-        })
+        resp = flask.make_response("Enter tweet_id, tweet_text and user_handle fields!", 404)
 
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
@@ -133,9 +130,9 @@ def show_history():
 
     user_handle = request.values.get('user_handle')
     if user_handle is None:
-        return flask.make_response({
-            "ERROR": "Send user handle in request!"
-        })
+        resp = flask.make_response("Send user handle in request!", 404)
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        return resp
     
     # do a select query and get history
     cur.execute("SELECT * FROM bot_history",)
@@ -171,17 +168,17 @@ def display():
     tweets = get_tweets(handle, filter_scientific=True, debug=True)
     print(f"Handle = {handle}")
 
-    # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
+    if tweets is None:
+        resp = flask.make_response("User not found!", 404)
+    
     if handle:
         handle = handle.lower() # since it is NOT case-sensitive
         resp = flask.make_response({
             "Handle": f"{handle}",
             "Tweets": tweets 
-        })    
+        }, 200)    
     else:
-        resp = flask.make_response({
-            "ERROR": "No handle found, please send a handle."
-        })
+        resp = flask.make_response("No handle found, please send a handle.", 400)
 
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
