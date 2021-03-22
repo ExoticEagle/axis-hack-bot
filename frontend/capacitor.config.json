@@ -1,0 +1,27 @@
+{
+  "appId": "com.exoticeagles.axisapp",
+  "appName": "Exotic Eagles Bot",
+
+  "webDir": "build",
+
+  "npmClient": "npm",
+
+  "bundledWebRuntime": true,
+
+  "hideLogs": true,
+
+  "server": {
+    "hostname": "app",
+    "iosScheme": "ionic",
+    "androidScheme": "http",
+    "allowNavigation": ["example.org", "*.example.org", "192.0.2.1"],
+  },
+  "backgroundColor": "#ffffff",
+  "android": {
+    "backgroundColor": "#ffffff",
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true,
+    "hideLogs": true,
+  },
+}
