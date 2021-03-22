@@ -9,7 +9,7 @@ import re
 import requests
 
 # local imports
-from .ml import tweet_get_reply
+from ml import ml
 
 app = Flask(__name__)
 
@@ -94,25 +94,20 @@ def update_history():
     user_handle = request.values.get('user_handle')
     
     if tweet_id and tweet_text and user_handle:
-        try:
-            reply_text = tweet_get_reply(tweet_text)
-            insert_history(reply_text, tweet_id, user_handle)
-            print(f"Found tweet text: {tweet_text}")
-        except Exception as e:
-            print(e)
-            print(f"Tweet text not found! (None)")
-            tweet_text = None
-            reply_text = None    
-        finally:
-            resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
-                "tweet_id": tweet_id,
-                "user_handle": user_handle,
-                "tweet_text": tweet_text,
-                "reply_text": reply_text,
-            })
+        reply_text = ml.tweet_get_reply(tweet_text)[:280]
+        print(f"Found tweet text: {tweet_text}")
+        print(f"Reply text: {reply_text}")
+        insert_history(reply_text, tweet_id, user_handle)
+
+        resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
+            "tweet_id": tweet_id,
+            "user_handle": user_handle,
+            "tweet_text": tweet_text,
+            "reply_text": reply_text,
+        })
     else:
         resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
-            "ERROR": "Enter both tweet_id and user_handle fields!"
+            "ERROR": "Enter tweet_id, tweet_text and user_handle fields!"
         })
 
     resp.headers['Access-Control-Allow-Origin'] = '*'
