@@ -170,6 +170,8 @@ def display():
 
     if tweets is None:
         resp = flask.make_response("User not found!", 404)
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        return resp
     
     if handle:
         handle = handle.lower() # since it is NOT case-sensitive
