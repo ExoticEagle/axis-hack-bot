@@ -14,7 +14,7 @@
     "hostname": "app",
     "iosScheme": "ionic",
     "androidScheme": "http",
-    "allowNavigation": ["example.org", "*.example.org", "192.0.2.1"],
+    "allowNavigation": ["example.org", "*.example.org", "192.0.2.1"]
   },
   "backgroundColor": "#ffffff",
   "android": {
