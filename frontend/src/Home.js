@@ -209,10 +209,6 @@ class Home extends React.Component {
     return (
       <div>
         <Header history={this.history} />
-        {this.createform()}
-        {this.renderGenerateButton()}
-        {this.state.isFinalTweetLoading && this.renderCreateLoading()}
-        {this.state.onDisplay && this.renderTweets()}
         <div className="">
           <button
             class="blocks accent p-5 "
@@ -224,6 +220,10 @@ class Home extends React.Component {
             Users responded to
           </button>
         </div>
+        {this.createform()}
+        {this.renderGenerateButton()}
+        {this.state.isFinalTweetLoading && this.renderCreateLoading()}
+        {this.state.onDisplay && this.renderTweets()}
       </div>
     );
   }
