@@ -52,7 +52,7 @@ def get_tweets(handle, science_word_threshold = 2, debug=False):
         print(f"For tweet ({tweet.strip()}), no of science words: {c}")
         # ratio of scientific words in the tweet to total no of words in the tweet should be greater than 1
         # if len(text) == 0 or (c/len(text) < science_word_threshold): 
-        if c < science_word_threshold and not (len(text) <= 3 and c == 1):
+        if c < science_word_threshold and not (len(text) <= 3 and c == 1) and idx in indices_to_keep:
             indices_to_keep.remove(idx)
 
     user_tweets = [tweet for i, tweet in enumerate(all_tweets) if i in indices_to_keep]
