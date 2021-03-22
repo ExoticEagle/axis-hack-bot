@@ -22,13 +22,12 @@ jobs:
 
     - name: init
       run: |
-        npm install @capacitor/core@next @capacitor/cli@next
+        npm install
         npx cap init
         sed -i '1s/^/import "@capacitor\/core";/' ./src/index.js
 
     - name: setup android
       run: |
-        npm install @capacitor/android@next
         npx cap add android
 
     - name: Upload build as artifact
