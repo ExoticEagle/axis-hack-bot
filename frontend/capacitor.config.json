@@ -1,15 +1,10 @@
 {
   "appId": "com.exoticeagles.axisapp",
   "appName": "Exotic Eagles Bot",
-
   "webDir": "build",
-
   "npmClient": "npm",
-
   "bundledWebRuntime": true,
-
   "hideLogs": true,
-
   "server": {
     "hostname": "app",
     "iosScheme": "ionic",
