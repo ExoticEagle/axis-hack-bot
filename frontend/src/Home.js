@@ -34,7 +34,7 @@ class Home extends React.Component {
             <input
               type="text"
               placeholder="Twitter handle"
-              className="lg:py-3 px-2 py-1 lg:px-4 outline-none lg:w-full"
+              className="lg:py-3 px-2 py-1 lg:px-4 outline-none w-full"
               value={this.state.currentHandle}
               onChange={(e) => this.setState({ currentHandle: e.target.value })}
             />
