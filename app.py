@@ -137,8 +137,6 @@ def show_history():
             "ERROR": "Send user handle in request!"
         })
     
-    tweets = get_tweets(user_handle, filter_scientific=False)
-    
     # do a select query and get history
     cur.execute("SELECT * FROM bot_history",)
     results = cur.fetchall()
@@ -146,15 +144,23 @@ def show_history():
     cur.close()
     conn.close()
     
-    print(f"Results: {results}")
+    if results:
+        tweets = get_tweets(user_handle, filter_scientific=False)
+        tweets = list([i.strip() for i, j in tweets])
+        print(f"Tweets: {tweets}")
+        print(f"Results: {results}")
+        
+        _, x, _, _ = (zip(*results))    # list of all reply_contents
+        x = list([i.strip() for i in x])
+        print(f"x = {x}")
+        resp = flask.make_response({
+            "Records" : [tweet for tweet in tweets if tweet in x]
+        })
+    else:
+        resp = flask.make_response({
+            "Records" : []
+        })
 
-    _, x, _, _ = (zip(*results))    # list of all reply_contents
-    x = list([i.strip() for i in x])
-    print(f"x = {x}")
-
-    resp = flask.make_response({
-        "Records" : [tweet for tweet in tweets if tweet[0].strip() in x]
-    })
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
