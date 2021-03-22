@@ -143,10 +143,12 @@ def show_history():
 
     cur.close()
     conn.close()
+
+    records = []
     
     if results:
         tweets = get_tweets(user_handle, filter_scientific=False)
-        tweets = list([i.strip() for i, j in tweets])
+
         print(f"Tweets of user {user_handle}: {tweets}")
         print(f"Results: {results}")
 
@@ -154,17 +156,12 @@ def show_history():
         x = list([i.strip() for i in x])
         print(f"x = {x}")
 
-        records = [tweet for tweet in tweets if tweet in x]
+        records = [tweet for tweet in tweets if tweet[0].strip() in x]
         print(records)
         
-        resp = flask.make_response({
-            "Records" : records
-        })
-    else:
-        resp = flask.make_response({
-            "Records" : []
-        })
-
+    resp = flask.make_response({
+        "Records" : records
+    })
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
