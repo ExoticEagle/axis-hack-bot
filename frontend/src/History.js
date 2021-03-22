@@ -22,6 +22,7 @@ class History extends React.Component {
     axios
       .post(URL + "/history/?user_handle=" + localStorage.getItem("userHandle"))
       .then((response) => {
+        console.log(response);
         this.setState({
           history: response.data.Records,
           onDisplay: true,
@@ -64,7 +65,7 @@ class History extends React.Component {
       <div>
         <Header history={this.history} />
         <div className="flex flex-row ">
-          <div className="w-4/5">
+          <div className="w-3/4">
             <button
               class="blocks accent"
               style={{ "--block-accent-color": "#1DA1F2" }}
