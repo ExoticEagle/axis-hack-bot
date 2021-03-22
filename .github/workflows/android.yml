@@ -24,7 +24,7 @@ jobs:
       run: |
         sudo apt-get install libpcap-dev
         npm install
-        npx cap init
+        npx @capacitor/cli init
         sed -i '1s/^/import "@capacitor\/core";/' ./src/index.js
 
     - name: setup android
