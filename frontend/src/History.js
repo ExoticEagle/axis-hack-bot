@@ -2,6 +2,7 @@ import React from "react";
 import axios from "axios";
 import { Tweet } from "react-twitter-widgets";
 import Header from "./Header.js";
+import URL from "./Constants";
 
 class History extends React.Component {
   constructor(props) {
@@ -19,10 +20,10 @@ class History extends React.Component {
       onDisplay: false,
     });
     axios
-      .post(URL + "history", { userHandle: localStorage.getItem("userHandle") })
+      .post(URL + "/history/?user_handle=" + localStorage.getItem("userHandle"))
       .then((response) => {
         this.setState({
-          history: response.data.history,
+          history: response.data.Records,
           onDisplay: true,
         });
       })
@@ -34,14 +35,28 @@ class History extends React.Component {
           onDisplay: true,
         })
       );
+    console.log(this.state.history);
+  }
+  renderCreateLoading() {
+    return (
+      <div class="relative flex justify-center items-center ">
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5  bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5  bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5 bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+        <div class="inline-block animate-spin ease duration-50 w-5 h-5 bg-gradient-to-r from-pink-500 to-yellow-500 mx-2"></div>
+      </div>
+    );
   }
   renderHistory() {
-    return this.state.history.map((history) => (
-      <div className="mb-2">
-        <Tweet tweetId={history[2]} />
-        <Tweet tweetId={history[1]} />
+    return (
+      <div>
+        {this.state.history.map((history) => (
+          <div className="mb-2">
+            <Tweet tweetId={history[1]} />
+          </div>
+        ))}
       </div>
-    ));
+    );
   }
 
   render() {
@@ -69,6 +84,7 @@ class History extends React.Component {
             </button>
           </div>
         </div>
+        {!this.state.onDisplay && this.renderCreateLoading()}
         {this.state.onDisplay && this.renderHistory()}
       </div>
     );
