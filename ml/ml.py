@@ -34,7 +34,7 @@ def get_science_word_count(tweet):
   c = 0
   for word in tokens:
     if word in science_vocab:
-      print(word)
+      # print(word)
       words.append(word)
       c += 1
   return c, (" ".join(words))
@@ -115,7 +115,7 @@ def get_summary_text(tweet):
   google_summary = contents(search(remove_stop_words(tweet)))
   summaries.append(google_summary)
   for s in summary_get_sentences(tweet):
-    print(s, 'h')
+    # print(s, 'h')
     google_summary = contents(search(s))
     summaries.append(google_summary)
 
@@ -139,7 +139,7 @@ def sentence_get_value(sentence, tweet):
 def tweet_get_reply(tweet):
   summary = get_summary_text(tweet)
   sentences = summary_get_sentences(summary)
-  print(sentences)
+  # print(sentences)
   sentences = list(set(sentences))
   sentences.sort(key=lambda x: sentence_get_value(x, tweet), reverse=True)
   final_sentences = sentences[:3]
