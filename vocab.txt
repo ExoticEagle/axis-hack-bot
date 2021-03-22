@@ -11979,7 +11979,7 @@ hv
 orib
 perk
 ía
-univers
+universe
 iagen
 assisted
 ancestral
@@ -27082,7 +27082,6 @@ hyperkal
 matrices
 erd
 laemmli
-호
 assistant
 cyanobacteria
 imidazol
@@ -27178,7 +27177,6 @@ sarcoid
 oston
 esium
 gloss
-002_
 classic
 fy
 meta
@@ -27234,3 +27232,15 @@ zard
 miniaturized
 full
 polyester
+dolphin
+dolphins
+quarantine
+quarantining
+virologist
+pioneer
+pioneering
+planet
+planets
+ichthyology
+jupiter
+opposing
