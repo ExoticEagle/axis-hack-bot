@@ -10,22 +10,12 @@ class Home extends React.Component {
     this.state = {};
     this.state.isFinalTweetLoading = false;
     this.state.loaded = [];
-    this.state.history = [
-      {
-        tweetHandle: "dfdf",
-        tweetID: "hello world",
-        replyID: "ridiculous analogy",
-        tweetText: "sdfds",
-        replyText: "dfs",
-      },
-    ];
     this.state.tweets = [];
     this.state.replytweet = "";
     this.state.isLoadingReplyTweet = [];
     this.state.isReplyButtonVisible = false;
     this.state.openReplyDialog = false;
     this.state.replyingIndex = -1;
-
     this.history = this.props.history;
     this.state.currentHandle = "";
     this.state.errorMessage = "";
@@ -35,6 +25,7 @@ class Home extends React.Component {
     this.handleGenerateButton = this.handleGenerateButton.bind(this);
     this.renderGenerateButton = this.renderGenerateButton.bind(this);
     this.renderCreateLoading = this.renderCreateLoading.bind(this);
+    this.renderError = this.renderError.bind(this);
   }
   createform() {
     return (
@@ -65,37 +56,44 @@ class Home extends React.Component {
   }
 
   renderTweets() {
-    return this.state.tweets.map((tweet, index) => (
-      <div
-        class="m-4 "
-        onClick={() => {
-          this.setState({
-            replyingIndex: index,
-            openReplyDialog: true,
-          });
-          //this.handleReply();
-        }}
-      >
-        <Tweet
-          onLoad={() => {
-            this.setState((state) => {
-              state.loaded[index] = 1;
-              if (index === state.tweets.length - 1)
-                state.isFinalTweetLoading = false;
-              return state;
-            });
-          }}
-          tweetId={tweet[1]}
-        />
-        {this.state.isLoadingReplyTweet[index] !== 0 &&
-          this.renderLoadingicon()}
-        <div class="flex item-end">
-          {this.state.isReplyButtonVisible &&
-            this.state.loaded[index] !== 0 &&
-            this.renderReplyButton(tweet, index)}
-        </div>
+    return (
+      <div>
+        {this.state.tweets.length === 0 &&
+          !this.state.isFinalTweetLoading &&
+          this.renderError()}
+        {this.state.tweets.map((tweet, index) => (
+          <div
+            class="m-4 "
+            onClick={() => {
+              this.setState({
+                replyingIndex: index,
+                openReplyDialog: true,
+              });
+              //this.handleReply();
+            }}
+          >
+            <Tweet
+              onLoad={() => {
+                this.setState((state) => {
+                  state.loaded[index] = 1;
+                  if (index === state.tweets.length - 1)
+                    state.isFinalTweetLoading = false;
+                  return state;
+                });
+              }}
+              tweetId={tweet[1]}
+            />
+            {this.state.isLoadingReplyTweet[index] !== 0 &&
+              this.renderLoadingicon()}
+            <div class="flex item-end">
+              {this.state.isReplyButtonVisible &&
+                this.state.loaded[index] !== 0 &&
+                this.renderReplyButton(tweet, index)}
+            </div>
+          </div>
+        ))}
       </div>
-    ));
+    );
   }
   renderLoadingicon() {
     return (
@@ -146,7 +144,13 @@ class Home extends React.Component {
       </div>
     );
   }
-
+  renderError() {
+    return (
+      <div>
+        <p className="font-extrabold">No anti-scientific tweets.</p>
+      </div>
+    );
+  }
   updateHistory(tweet, index) {
     this.setState({
       onLoadReplyTweet: true,
