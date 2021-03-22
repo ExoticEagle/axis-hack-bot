@@ -15,7 +15,7 @@
 		"react-scripts": "4.0.3",
 		"react-twitter-widgets": "^1.9.5",
 		"web-vitals": "^1.1.1",
-        "@capacitor/core@next": "2.4.7",
+        "@capacitor/core": "2.4.7",
         "@capacitor/android": "2.4.7",
         "@capacitor/cli": "2.4.7"
 	},
