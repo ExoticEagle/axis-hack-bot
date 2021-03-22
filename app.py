@@ -148,7 +148,7 @@ def show_history():
     print(f"x = {x}")
 
     resp = flask.make_response({
-        "Records" : [tweet for tweet in tweets if tweet[0] in x]
+        "Records" : [tweet for tweet in tweets if tweet[0].strip() in x]
     })
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
