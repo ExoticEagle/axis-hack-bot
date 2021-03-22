@@ -142,8 +142,10 @@ def show_history():
     conn.close()
     
     print(results)
+
+    x = list(zip(*results))[1] # list of all reply_contents
     resp = flask.make_response({
-        "Records" : [tweet for tweet in tweets if tweet[0] in zip(*results)[1]]
+        "Records" : [tweet for tweet in tweets if tweet[0] in x]
         # "Records" : [list(record)[1:] for record in results if record[1] in zip(*tweets)[0]]
     })
     resp.headers['Access-Control-Allow-Origin'] = '*'
