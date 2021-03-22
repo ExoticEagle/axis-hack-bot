@@ -41,7 +41,8 @@ jobs:
     - name: Build with Gradle
       run: |
         android/gradlew tasks
-        android/gradlew build
+        android/gradlew buildEnvironment
+        android/gradlew model
 
     - uses: actions/upload-artifact@v2
       with:
