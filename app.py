@@ -135,7 +135,7 @@ def show_history():
     tweets = get_tweets(user_handle)
     
     # do a select query and get history
-    cur.execute("SELECT * FROM bot_history WHERE user_handle LIKE %s ESCAPE ''", (user_handle,))
+    cur.execute("SELECT * FROM bot_history",)
     results = cur.fetchall()
 
     cur.close()
