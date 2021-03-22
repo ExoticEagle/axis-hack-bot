@@ -93,11 +93,11 @@ def insert_history(reply_text, tweet_id, tweet_author):
 @app.route('/update_history/', methods=['POST', 'GET'])
 def update_history():
     tweet_id = request.values.get('tweet_id')
+    tweet_text = request.values.get('tweet_text')
     user_handle = request.values.get('user_handle')
     
-    if tweet_id and user_handle:
+    if tweet_id and tweet_text and user_handle:
         try:
-            tweet_text = list(filter(lambda x:  x[1]==tweet_id, get_tweets(user_handle)))[0][0]
             reply_text = get_reply_text(tweet_text)
             insert_history(reply_text, tweet_id, user_handle)
             print(f"Found tweet text: {tweet_text}")
@@ -141,12 +141,13 @@ def show_history():
     cur.close()
     conn.close()
     
-    print(results)
+    print(f"Results: {results}")
 
-    x = list(zip(*results))[1] # list of all reply_contents
+    _, x, _, _ = (zip(*results))    # list of all reply_contents
+    print(f"x = {x}")
+   
     resp = flask.make_response({
         "Records" : [tweet for tweet in tweets if tweet[0] in x]
-        # "Records" : [list(record)[1:] for record in results if record[1] in zip(*tweets)[0]]
     })
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
