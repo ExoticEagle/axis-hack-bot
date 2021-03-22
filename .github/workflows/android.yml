@@ -29,8 +29,22 @@ jobs:
     - name: setup android
       run: |
         npx cap add android
-        npx cap build android
 
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+        
+    - name: chmod
+      run: chmod +x android/gradlew
+      
+    - name: Build with Gradle
+      run: android/gradlew installDebug
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: build
+        path: ${{ github.workspace }}/android/app/build/outputs
 
     - name: Upload build as artifact
       uses: actions/upload-artifact@v1
