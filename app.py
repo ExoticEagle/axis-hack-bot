@@ -18,7 +18,7 @@ def is_not_hashtag(obj):
     return type(obj) != type(bs4.Tag(name=''))
 
 # Returns list of tuples (tweet, tweet_id) for tweets that are NOT retweets
-def get_tweets(handle, debug=False):
+def get_tweets(handle, science_word_threshold = 2, debug=False):
     response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}")
     soup = BeautifulSoup(response.json()['body'], "html.parser")
 
@@ -41,6 +41,18 @@ def get_tweets(handle, debug=False):
     # filter out retweets
     for idx, author in enumerate(soup.find_all("span", class_ = "TweetAuthor-screenName Identity-screenName")):
         if author.contents[0].lower() != f"@{handle}".lower() and idx in indices_to_keep: # if have to remove it
+            indices_to_keep.remove(idx)
+    
+    user_tweets = [tweet for i, tweet in enumerate(all_tweets) if i in indices_to_keep]
+    user_ids = [_id for idx, _id in enumerate(all_ids) if idx in indices_to_keep]
+
+    for idx, tweet in enumerate(user_tweets):
+        c, text = ml.get_science_word_count(tweet)
+        text = text.split()
+        print(f"For tweet ({tweet.strip()}), no of science words: {c}")
+        # ratio of scientific words in the tweet to total no of words in the tweet should be greater than 1
+        # if len(text) == 0 or (c/len(text) < science_word_threshold): 
+        if c < science_word_threshold and not (len(text) <= 3 and c == 1) and idx in indices_to_keep:
             indices_to_keep.remove(idx)
 
     user_tweets = [tweet for i, tweet in enumerate(all_tweets) if i in indices_to_keep]
@@ -94,7 +106,7 @@ def update_history():
     user_handle = request.values.get('user_handle')
     
     if tweet_id and tweet_text and user_handle:
-        reply_text = ml.tweet_get_reply(tweet_text)[:280]
+        reply_text = ml.tweet_get_reply(tweet_text)[:279]
         print(f"Found tweet text: {tweet_text}")
         print(f"Reply text: {reply_text}")
         insert_history(reply_text, tweet_id, user_handle)
