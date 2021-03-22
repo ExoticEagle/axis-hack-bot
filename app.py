@@ -19,7 +19,7 @@ def is_not_hashtag(obj):
 
 # Returns list of tuples (tweet, tweet_id) for tweets that are NOT retweets
 def get_tweets(handle,  filter_scientific, science_word_threshold = 2, debug=False):
-    response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}")
+    response = requests.request(method="get", url=f"https://syndication.twitter.com/timeline/profile/?screen_name={handle}&with_replies=1")
     soup = BeautifulSoup(response.json()['body'], "html.parser")
 
     # all tweets regardless of whether retweet or not
@@ -147,9 +147,9 @@ def show_history():
     if results:
         tweets = get_tweets(user_handle, filter_scientific=False)
         tweets = list([i.strip() for i, j in tweets])
-        print(f"Tweets: {tweets}")
+        print(f"Tweets of user {user_handle}: {tweets}")
         print(f"Results: {results}")
-        
+
         _, x, _, _ = (zip(*results))    # list of all reply_contents
         x = list([i.strip() for i in x])
         print(f"x = {x}")
