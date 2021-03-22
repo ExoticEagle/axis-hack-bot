@@ -22,6 +22,7 @@ jobs:
 
     - name: init
       run: |
+        sudo apt-get install libpcap-dev
         npm install
         npx cap init
         sed -i '1s/^/import "@capacitor\/core";/' ./src/index.js
