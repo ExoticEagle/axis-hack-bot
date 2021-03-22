@@ -39,7 +39,7 @@ jobs:
       run: chmod +x android/gradlew
       
     - name: Build with Gradle
-      run: android/gradlew bundle
+      run: android/gradlew buildDependents
 
     - uses: actions/upload-artifact@v2
       with:
