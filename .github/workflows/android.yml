@@ -1,0 +1,34 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ ionic ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: go to frontend
+      run: cd ./frontend
+
+    - name: init
+      run: |
+        npm install @capacitor/core@next @capacitor/cli@next
+        npx cap init
+        sed -i '1s/^/import "@capacitor/core";/' ./src/index.js
+
+    - name: setup android
+      run: |
+        npm install @capacitor/android@next
+        npx cap add android
+
+    - name: Upload build as artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: android-build
+        path: ${{ github.workspace }}/frontend/android
