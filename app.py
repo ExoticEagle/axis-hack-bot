@@ -9,7 +9,7 @@ import re
 import requests
 
 # local imports
-from .ml import tweet_get_reply
+from ml import ml
 
 app = Flask(__name__)
 
@@ -95,7 +95,7 @@ def update_history():
     
     if tweet_id and tweet_text and user_handle:
         try:
-            reply_text = tweet_get_reply(tweet_text)
+            reply_text = ml.tweet_get_reply(tweet_text)
             insert_history(reply_text, tweet_id, user_handle)
             print(f"Found tweet text: {tweet_text}")
         except Exception as e:
