@@ -1,14 +1,15 @@
 # app.py
-# import asyncpg
 import bs4
 from bs4 import BeautifulSoup
 import flask
 from flask import Flask, request, jsonify, url_for
-import json
 import os
 import psycopg2
 import re
 import requests
+
+# local imports
+from .ml import tweet_get_reply
 
 app = Flask(__name__)
 
@@ -50,10 +51,6 @@ def get_tweets(handle, debug=False):
         print(f"User ids: {user_ids}")
 
     return list(zip(user_tweets, user_ids))
-    
-#! ML STUFF
-def get_reply_text(tweet_text):
-	return "Not implemented yet!"
 
 #!########## DATABASE STUFF ##########
 def init_db():
@@ -98,10 +95,11 @@ def update_history():
     
     if tweet_id and tweet_text and user_handle:
         try:
-            reply_text = get_reply_text(tweet_text)
+            reply_text = tweet_get_reply(tweet_text)
             insert_history(reply_text, tweet_id, user_handle)
             print(f"Found tweet text: {tweet_text}")
-        except:
+        except Exception as e:
+            print(e)
             print(f"Tweet text not found! (None)")
             tweet_text = None
             reply_text = None    
@@ -122,7 +120,6 @@ def update_history():
 
 @app.route('/history/', methods=['POST', 'GET'])
 def show_history():
-    
     conn = init_db()
     cur = conn.cursor()
 

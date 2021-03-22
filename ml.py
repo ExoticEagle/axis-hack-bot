@@ -11,7 +11,7 @@ import re
 nlp = spacy.load('en_core_web_sm')
 
 science_vocab = set()
-with open('vocab.txt') as f:
+with open('vocab.txt', encoding="utf8") as f:
   text = f.readline()
   while text:
     science_vocab.add(text.lower().strip())
