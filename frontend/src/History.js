@@ -14,6 +14,10 @@ class History extends React.Component {
     this.state.errorMessage = "";
     this.handleHistory = this.handleHistory.bind(this);
     this.renderHistory = this.renderHistory.bind(this);
+    this.renderError = this.renderError.bind(this);
+  }
+  componentDidMount() {
+    this.handleHistory();
   }
   handleHistory() {
     this.setState({
@@ -22,9 +26,9 @@ class History extends React.Component {
     axios
       .post(URL + "/history/?user_handle=" + localStorage.getItem("userHandle"))
       .then((response) => {
+        console.log(response);
         this.setState({
           history: response.data.Records,
-          onDisplay: true,
         });
       })
       .catch(function (error) {
@@ -47,6 +51,13 @@ class History extends React.Component {
       </div>
     );
   }
+  renderError() {
+    return (
+      <div>
+        <p className="font-extrabold">No tweets yet.</p>
+      </div>
+    );
+  }
   renderHistory() {
     return (
       <div>
@@ -58,13 +69,12 @@ class History extends React.Component {
       </div>
     );
   }
-
   render() {
     return (
       <div>
         <Header history={this.history} />
         <div className="flex flex-row ">
-          <div className="w-4/5">
+          <div className="w-3/4">
             <button
               class="blocks accent"
               style={{ "--block-accent-color": "#1DA1F2" }}
@@ -85,6 +95,7 @@ class History extends React.Component {
           </div>
         </div>
         {!this.state.onDisplay && this.renderCreateLoading()}
+        {this.state.history.length === 0 && this.renderError()}
         {this.state.onDisplay && this.renderHistory()}
       </div>
     );

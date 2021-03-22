@@ -42,5 +42,11 @@
 			"last 1 safari version"
 		]
 	},
-	"proxy": "http://localhost:5000"
+	"proxy": "http://localhost:5000",
+    "prettier": {
+      "trailingComma": "es5",
+      "tabWidth": 2,
+      "semi": true,
+      "singleQuote": true
+    }
 }
