@@ -2,7 +2,6 @@ import React from "react";
 import Header from "./Header.js";
 import URL from "./Constants.js";
 import axios from "axios";
-import { Redirect } from "react-router";
 import { Tweet } from "react-twitter-widgets";
 
 class Home extends React.Component {
@@ -21,19 +20,17 @@ class Home extends React.Component {
       },
     ];
     this.state.tweets = [];
-    this.state.replytweet = {
-      id: "fdsdsf",
-      text: "dfsdafsf",
-    };
+    this.state.replytweet = "";
+    this.state.isLoadingReplyTweet = [];
     this.state.isReplyButtonVisible = false;
     this.state.openReplyDialog = false;
     this.state.replyingIndex = -1;
+
     this.history = this.props.history;
     this.state.currentHandle = "";
     this.state.errorMessage = "";
     this.state.onDisplay = false;
-
-    this.handleReply = this.handleReply.bind(this);
+    this.renderLoadingicon = this.renderLoadingicon.bind(this);
     this.renderReplyButton = this.renderReplyButton.bind(this);
     this.handleGenerateButton = this.handleGenerateButton.bind(this);
     this.renderGenerateButton = this.renderGenerateButton.bind(this);
@@ -90,16 +87,28 @@ class Home extends React.Component {
           }}
           tweetId={tweet[1]}
         />
-
+        {this.state.isLoadingReplyTweet[index] !== 0 &&
+          this.renderLoadingicon()}
         <div class="flex item-end">
           {this.state.isReplyButtonVisible &&
-            this.state.loaded[index] != 0 &&
-            this.renderReplyButton(tweet)}
+            this.state.loaded[index] !== 0 &&
+            this.renderReplyButton(tweet, index)}
         </div>
       </div>
     ));
   }
-
+  renderLoadingicon() {
+    return (
+      <div>
+        <p>
+          <span>
+            <i class="fas fa-spinner fa-spin"></i>
+          </span>
+          <span>Generating reply..</span>
+        </p>
+      </div>
+    );
+  }
   handleGenerateButton() {
     this.setState({
       isFinalTweetLoading: true,
@@ -111,6 +120,7 @@ class Home extends React.Component {
         this.setState({
           tweets: response.data.Tweets,
           loaded: Array(response.data.Tweets.length).fill(0),
+          isLoadingReplyTweet: Array(response.data.Tweets.length).fill(0),
         });
       })
       .catch(function (error) {
@@ -136,54 +146,62 @@ class Home extends React.Component {
       </div>
     );
   }
-  handleReply(tweet) {
+
+  updateHistory(tweet, index) {
+    this.setState({
+      onLoadReplyTweet: true,
+    });
     axios
-      .post(URL + "replyToTweet", {
-        tweetID: tweet[0],
-      })
+      .post(
+        URL +
+          "/update_history/?tweet_id=" +
+          tweet[1] +
+          "&tweet_text=" +
+          tweet[0] +
+          "&user_handle=" +
+          localStorage.getItem("userHandle")
+      )
       .then((response) => {
-        this.setState({
-          replytweet: response.data.reply_tweet,
+        // console.log(response.data);
+        this.setState((state) => {
+          state.isLoadingReplyTweet[index] = 0;
         });
+        this.setState(
+          {
+            replytweet: response.data.reply_text,
+          },
+          (state) => {
+            var tweetURL =
+              "https://twitter.com/intent/tweet?text=" +
+              this.state.replytweet +
+              "&in_reply_to=" +
+              tweet[1];
+
+            //console.log(this.state.replytweet);
+            window.open(tweetURL, "_blank") ||
+              window.location.replace(tweetURL);
+          }
+        );
       })
       .catch(function (error) {
         console.log(error);
       });
   }
-  updateHistory(tweet) {
-    // axios
-    //   .post(URL + "/update_history", {
-    //     tweetHandle: this.state.currentHandle,
-    //     tweetID: tweet[1],
-    //     //replyID: this.state.replytweet.id,
-    //     tweetText: tweet[0],
-    //     //replyText: this.state.replytweet.text,
-    //   })
-    //   .catch(function (error) {
-    //     console.log(error);
-    //   });
-    console.log("we are here");
-  }
-  renderReplyButton(tweet) {
-    //this.handleReply(tweet);
-    var tweetURL =
-      "https://twitter.com/intent/tweet?text=" +
-      this.state.replytweet.text +
-      "&in_reply_to=" +
-      tweet[1];
-
+  renderReplyButton(tweet, index) {
     return (
       <div>
-        <a
+        <button
           class="blocks accent"
           style={{ "--block-accent-color": "#1DA1F2" }}
           onClick={() => {
-            this.updateHistory(tweet);
+            this.setState((state) => {
+              state.isLoadingReplyTweet[index] = 1;
+            });
+            this.updateHistory(tweet, index);
           }}
-          href={tweetURL}
         >
           Reply
-        </a>
+        </button>
       </div>
     );
   }
