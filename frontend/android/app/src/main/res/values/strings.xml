@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Exotic Eagles Bot</string>
+    <string name="title_activity_main">Exotic Eagles Bot</string>
+    <string name="package_name">com.exoticeagles.axisapp</string>
+    <string name="custom_url_scheme">com.exoticeagles.axisapp</string>
+</resources>
