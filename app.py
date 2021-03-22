@@ -92,22 +92,31 @@ def insert_history(reply_text, tweet_id, tweet_author):
 # takes just one tweet ID as GET parameter and inserts into table
 @app.route('/update_history/', methods=['POST', 'GET'])
 def update_history():
-    tweet_id = request.args.get('tweet_id')
-    tweet_author = request.args.get('tweet_author')
+    tweet_id = request.values.get('tweet_id')
+    tweet_text = request.values.get('tweet_text')
+    user_handle = request.values.get('user_handle')
     
-    tweet_text = list(filter(lambda x:  x[1]==tweet_id, get_tweets(tweet_author)))[0][0]
-    print(f"Found tweet text: {tweet_text}")
-    reply_text = get_reply_text(tweet_text)
+    if tweet_id and tweet_text and user_handle:
+        try:
+            reply_text = get_reply_text(tweet_text)
+            insert_history(reply_text, tweet_id, user_handle)
+            print(f"Found tweet text: {tweet_text}")
+        except:
+            print(f"Tweet text not found! (None)")
+            tweet_text = None
+            reply_text = None    
+        finally:
+            resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
+                "tweet_id": tweet_id,
+                "user_handle": user_handle,
+                "tweet_text": tweet_text,
+                "reply_text": reply_text,
+            })
+    else:
+        resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
+            "ERROR": "Enter both tweet_id and user_handle fields!"
+        })
 
-    insert_history(reply_text, tweet_id, tweet_author)
-    
-    resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
-        "Hello": "oh hi. update_history() function is over.",
-        "tweet_id": tweet_id,
-        "tweet_author": tweet_author,
-        "tweet_text": tweet_text,
-        "reply_text": reply_text,
-    })
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
@@ -117,16 +126,29 @@ def show_history():
     conn = init_db()
     cur = conn.cursor()
 
+    user_handle = request.values.get('user_handle')
+    if user_handle is None:
+        return flask.make_response({
+            "ERROR": "Send user handle in request!"
+        })
+    
+    tweets = get_tweets(user_handle)
+    
     # do a select query and get history
-    cur.execute("SELECT * FROM bot_history")
+    cur.execute("SELECT * FROM bot_history",)
     results = cur.fetchall()
 
     cur.close()
     conn.close()
     
-    print(results)
+    print(f"Results: {results}")
+
+    _, x, _, _ = (zip(*results))    # list of all reply_contents
+    x = list([i.strip() for i in x])
+    print(f"x = {x}")
+
     resp = flask.make_response({
-        "Records" : [list(record)[1:] for record in results]
+        "Records" : [tweet for tweet in tweets if tweet[0].strip() in x]
     })
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
