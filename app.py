@@ -153,8 +153,12 @@ def show_history():
         _, x, _, _ = (zip(*results))    # list of all reply_contents
         x = list([i.strip() for i in x])
         print(f"x = {x}")
+
+        records = [tweet for tweet in tweets if tweet in x]
+        print(records)
+        
         resp = flask.make_response({
-            "Records" : [tweet for tweet in tweets if tweet in x]
+            "Records" : records
         })
     else:
         resp = flask.make_response({
