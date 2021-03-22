@@ -2,7 +2,7 @@
   "appId": "com.exoticeagles.axisapp",
   "appName": "Exotic Eagles Bot",
 
-  "webDir": "build",
+  "webDir": "public",
 
   "npmClient": "npm",
 
