@@ -16,8 +16,8 @@
 		"react-twitter-widgets": "^1.9.5",
 		"web-vitals": "^1.1.1",
         "@capacitor/core@next": "2.4.7",
-        "@capacitor/android@next": "2.4.7",
-        "@capacitor/cli@next": "2.4.7"
+        "@capacitor/android": "2.4.7",
+        "@capacitor/cli": "2.4.7"
 	},
 	"scripts": {
 		"start-flask": "../venv/Scripts/flask.exe run --no-debugger",
