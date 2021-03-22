@@ -95,19 +95,29 @@ def update_history():
     tweet_id = request.args.get('tweet_id')
     tweet_author = request.args.get('tweet_author')
     
-    tweet_text = list(filter(lambda x:  x[1]==tweet_id, get_tweets(tweet_author)))[0][0]
-    print(f"Found tweet text: {tweet_text}")
-    reply_text = get_reply_text(tweet_text)
+    if tweet_id and tweet_author:
+        try:
+            tweet_text = list(filter(lambda x:  x[1]==tweet_id, get_tweets(tweet_author)))[0][0]
+            reply_text = get_reply_text(tweet_text)
+            insert_history(reply_text, tweet_id, tweet_author)
+            print(f"Found tweet text: {tweet_text}")
+        except:
+            print(f"Tweet text not found! (None)")
+            tweet_text = None
+            reply_text = None    
+        finally:
+            resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
+                "Hello": "oh hi. update_history() function is over.",
+                "tweet_id": tweet_id,
+                "tweet_author": tweet_author,
+                "tweet_text": tweet_text,
+                "reply_text": reply_text,
+            })
+    else:
+        resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
+            "ERROR": "Enter both 'tweet_id and tweet_author fields!"
+        })
 
-    insert_history(reply_text, tweet_id, tweet_author)
-    
-    resp = flask.make_response({ # When a dict is passed to this, it automatically gets json-ified
-        "Hello": "oh hi. update_history() function is over.",
-        "tweet_id": tweet_id,
-        "tweet_author": tweet_author,
-        "tweet_text": tweet_text,
-        "reply_text": reply_text,
-    })
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
@@ -117,8 +127,14 @@ def show_history():
     conn = init_db()
     cur = conn.cursor()
 
+    tweet_author = request.values.get('tweet_author')
+    if tweet_author is None:
+        return flask.make_response({
+            "ERROR": "Send tweet_author handle in request!"
+        })
+    
     # do a select query and get history
-    cur.execute("SELECT * FROM bot_history")
+    cur.execute("SELECT * FROM bot_history WHERE tweet_author LIKE %s ESCAPE ''", (tweet_author,))
     results = cur.fetchall()
 
     cur.close()
