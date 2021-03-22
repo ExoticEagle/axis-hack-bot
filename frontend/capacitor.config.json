@@ -22,6 +22,6 @@
     "allowMixedContent": true,
     "captureInput": true,
     "webContentsDebuggingEnabled": true,
-    "hideLogs": true,
-  },
+    "hideLogs": true
+  }
 }
